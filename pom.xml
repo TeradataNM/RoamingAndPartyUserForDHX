@@ -10,9 +10,9 @@
 
     <properties>
         <!--<spark.home>/usr/local/spark/spark-1.5.2-bin-hadoop2.6</spark.home>-->
-        <hbase-common-bc.version>1.1.3-bc1.3.2</hbase-common-bc.version>
-        <hbase-client-bc.version>1.1.3-bc1.3.2</hbase-client-bc.version>
-        <hbase-server-bc.version>1.1.3-bc1.3.2</hbase-server-bc.version>
+        <hbase-common-bc.version>1.1.3-bc1.3.6</hbase-common-bc.version>
+        <hbase-client-bc.version>1.1.3-bc1.3.6</hbase-client-bc.version>
+        <hbase-server-bc.version>1.1.3-bc1.3.6</hbase-server-bc.version>
         <spark-core_2.10-bc.version>1.6.2-bc1.3.6</spark-core_2.10-bc.version>
         <spark-sql_2.10-bc.version>1.6.2-bc1.3.6</spark-sql_2.10-bc.version>
         <spark-streaming_2.10-bc.version>1.6.2-bc1.3.6</spark-streaming_2.10-bc.version>
