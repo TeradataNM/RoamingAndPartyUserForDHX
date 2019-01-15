@@ -1,6 +1,7 @@
 
 import java.util.{Calendar, Properties}
 
+import javax.swing.event.DocumentEvent.EventType
 import kafka.serializer.StringDecoder
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.{HashPartitioner, SparkContext}
@@ -118,6 +119,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         //          kafka-topics.sh --zookeeper zk-01:2181,zk-02:2181,zk-03:2181/kafka --create --replication-factor 1 --partitions 7 --topic ROAMING-AND-PARTY-USER-FOR-DHX
         val targetTopic = "ZNDX-USER-FOR-DHX"
         val area = new AreaList
+        val eerduosiArea = new EerduosiAreaList
 
         val hunValue = hunBro.value
         val conn = hunValue.createHbaseConnection
@@ -127,6 +129,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val honghuaerji = area.honghuaerji
         val wulanbuhe = area.wulanbuhe
         val tuoxian = area.tuoxian
+        val eerduosi = eerduosiArea.eerduosi
 
 
         val sortedPartition = partition.toList.sortBy(_._2._1._2)
@@ -135,24 +138,13 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
 
         val lastUserStatus = hunValue.getResultByKeyList_MAS(conn, "TourMasUser", distinctPartition)
 
-        //        鄂伦春常驻用户离开情况
-        //        val elunchunPermanentPopulation: mutable.HashMap[String, String] =
-        //          hunValue.getResultByKeyList_USER(conn, "TourMasUsualUser", distinctPartition)
+        //        内蒙领导离开状态查询结果
+        val leadersStatus = hunValue.getResultByKeyList_Leader(conn, "TourMasLeaderUser", "0", distinctPartition)
+        val chifengLeadersStatus = leadersStatus.filter(_._2._1.equals("2"))
+        val eerduosiLeadersStatus = leadersStatus.filter(_._2._1.equals("7"))
 
-        //        val elunchunLeaveUser = elunchunPermanentPopulation.filter(_._2.equals("1"))
-        //        val elunchunNotLeaveUser = elunchunPermanentPopulation.filter(_._2.equals("0"))
-
-        //        离开过赤峰的领导
-        val chifengLeaders: mutable.HashMap[String, String] =
-          hunValue.getResultByKeyList_Leader(conn, "TourMasLeaderUser", "0", "flag", distinctPartition)
-
-        val chifengLeaveLeaders = chifengLeaders.filter(_._2.equals("1"))
-        val chifengNotLeaveLeaders = chifengLeaders.filter(_._2.equals("0"))
-
-        //        val newElunchunPutMap: mutable.HashMap[String, String] = new scala.collection.mutable.HashMap
-        val newChifengLeaderPutMap: mutable.HashMap[String, String] = new scala.collection.mutable.HashMap
-
-
+        //        状态变化表
+        val putLeadersStatusMap: mutable.HashMap[String, (String, String)] = new scala.collection.mutable.HashMap
         sortedPartition.foreach(kline => {
 
           val line: ((String, Long), String, String, String, String, String, String, String) = kline._2
@@ -178,14 +170,13 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             lac + "|" +
             ci
 
-          val chifengFunc: Boolean = {
+          val chifengFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
               && local_city.equals("0476")
               && !owner_city.equals("0476")) true else false
           }
-
-          val elunchunFunc: Boolean = {
+          val elunchunFunc = {
             if (
             //              如果用户是漫入到鄂伦春的
               !roam_type.equals("4")
@@ -196,35 +187,13 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
 
             ) true else false
           }
-          //          val elunchunFunc1: Boolean = {
-          //            if (
-          //            //              如果用户是漫入到鄂伦春的
-          //              !roam_type.equals("4")
-          //                && !roam_type.equals("")
-          //                && local_city.equals("0470")
-          //                && !owner_city.equals("0470")
-          //                && elunchun.contains(lac_ci)
-          //
-          //            ) true else false
-          //          }
-
-          //          val elunchunFunc2: Boolean = {
-          //            if (
-          //            //                或者如果离开过鄂伦春的用户包含此用户 且 此用户重新进入了鄂伦春
-          //              elunchunLeaveUser.contains(phone_no)
-          //                && elunchun.contains(lac_ci)
-          //            ) true else false
-          //          }
-
-          val tongliaoFunc: Boolean = {
+          val tongliaoFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
               && local_city.equals("0475")
               && !owner_city.equals("0475")) true else false
           }
-
-
-          val badanjilinFunc: Boolean = {
+          val badanjilinFunc = {
             var successFlag = false
             var phone_no_head = ""
             try {
@@ -249,18 +218,15 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             }
             successFlag
           }
-
           val eerduosiFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
               && local_city.equals("0477")
               && !owner_city.equals("0477")) true else false
           }
-
           val honghuaerjiFunc = {
             if (honghuaerji.contains(lac_ci)) true else false
           }
-
           val wulanbuheFunc = {
             if (wulanbuhe.contains(lac_ci)
               && !roam_type.equals("4")
@@ -269,7 +235,6 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               && !owner_city.equals("0483")
             ) true else false
           }
-
           val tuoxianFunc = {
             if (tuoxian.contains(lac_ci)
               && !roam_type.equals("4")
@@ -278,7 +243,6 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               && !owner_city.equals("0471")
             ) true else false
           }
-
           val huhehaoteFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
@@ -287,9 +251,15 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             ) true else false
           }
 
+          val eerduosiLeadersFunc = {
+            if (local_city.equals("0477")
+              && eerduosi.contains(lac_ci)) true else false
+          }
+          val chifengLeaderFunc = {
+            if (local_city.equals("0476")) true else false
+          }
 
           if (lastUserStatus.contains(phone_no)) {
-
             val lastStatus: (String, Long, Long) = lastUserStatus(phone_no)
             val lastEventType = lastStatus._1
 
@@ -307,11 +277,6 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
                 //                    当此用户驻留时间超过1个小时
                 if (newDuration >= timeout) {
                   kafkaProducer.value.send(targetTopic, lastEventType + "|" + stringLine)
-
-                  //                  如果鄂伦春用户发送过信息，将鄂伦春用户重置回未离开过
-                  //                  if (elunchunFunc2) {
-                  //                    newElunchunPutMap.update(phone_no, "0")
-                  //                  }
                 }
 
                 lastUserStatus.update(phone_no, (lastEventType, startTimeLong / 1000, newDuration))
@@ -320,122 +285,79 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               }
 
             }
-
-
             //            漫入赤峰人群(所在地市，漫游类型)id:2
             //              赤峰2
-            if (lastEventType.equals("2")) {
-
-              judgeUserStayDuration(chifengFunc, 3600L)
-            }
+            if (lastEventType.equals("2")) judgeUserStayDuration(chifengFunc, 3600L)
             //            鄂伦春11
-            else if (lastEventType.equals("11")) {
-              judgeUserStayDuration(elunchunFunc, 600L)
-            }
+            else if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
             //              通辽9
-            else if (lastEventType.equals("9")) {
-              judgeUserStayDuration(tongliaoFunc, 1800L)
-            }
+            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 1800L)
             //            巴丹吉林旅游区14
-            else if (lastEventType.equals("14")) {
-              judgeUserStayDuration(badanjilinFunc, 3600L)
-            }
-            //              鄂尔多斯7
-            else if (lastEventType.equals("7")) {
-              judgeUserStayDuration(eerduosiFunc, 1800L)
-            }
+            else if (lastEventType.equals("14")) judgeUserStayDuration(badanjilinFunc, 3600L)
             //              红花尔基15
-            else if (lastEventType.equals("15")) {
-              judgeUserStayDuration(honghuaerjiFunc, 1800L)
-            }
+            else if (lastEventType.equals("15")) judgeUserStayDuration(honghuaerjiFunc, 1800L)
             //            阿拉善乌兰布和23
-            else if (lastEventType.equals("23")) {
-              judgeUserStayDuration(wulanbuheFunc, 3600L)
-            }
-
+            else if (lastEventType.equals("23")) judgeUserStayDuration(wulanbuheFunc, 3600L)
             //              托县25
-//            else if (lastEventType.equals("25")) {
-//              judgeUserStayDuration(tuoxianFunc, 600L)
-//            }
+            //            else if (lastEventType.equals("25")) {
+            //              judgeUserStayDuration(tuoxianFunc, 600L)
+            //            }
             //              呼和浩特27
-//            else if (lastEventType.equals("27")) {
-//              judgeUserStayDuration(huhehaoteFunc, 60L)
-//            }
-
-
+            //            else if (lastEventType.equals("27")) {
+            //              judgeUserStayDuration(huhehaoteFunc, 60L)
+            //            }
           }
           else {
+            def updateStatus(eventType: String): Unit = {
+              lastUserStatus.update(phone_no, (eventType, startTimeLong / 1000, 0))
+            }
             //                漫入赤峰，更新临时列表
-            if (chifengFunc) {
-              lastUserStatus.update(phone_no, ("2", startTimeLong / 1000, 0))
-            }
-            else if (elunchunFunc) {
-              lastUserStatus.update(phone_no, ("11", startTimeLong / 1000, 0))
-            }
-            else if (tongliaoFunc) {
-              lastUserStatus.update(phone_no, ("9", startTimeLong / 1000, 0))
-            }
-            else if (badanjilinFunc) {
-              lastUserStatus.update(phone_no, ("14", startTimeLong / 1000, 0))
-            }
-            else if (eerduosiFunc) {
-              lastUserStatus.update(phone_no, ("7", startTimeLong / 1000, 0))
-            }
-            else if (honghuaerjiFunc) {
-              lastUserStatus.update(phone_no, ("15", startTimeLong / 1000, 0))
-            }
-            else if (wulanbuheFunc) {
-              lastUserStatus.update(phone_no, ("23", startTimeLong / 1000, 0))
-            }
-//            else if (tuoxianFunc) {
-//              lastUserStatus.update(phone_no, ("25", startTimeLong / 1000, 0))
-//            }
-
-//            if (huhehaoteFunc) {
-//              lastUserStatus.update(phone_no, ("27", startTimeLong / 1000, 0))
-//            }
+            if (chifengFunc) updateStatus("2")
+            else if (elunchunFunc) updateStatus("11")
+            else if (tongliaoFunc) updateStatus("9")
+            else if (badanjilinFunc) updateStatus("14")
+            else if (honghuaerjiFunc) updateStatus("15")
+            else if (wulanbuheFunc) updateStatus("23")
+            //            else if (eerduosiFunc) {
+            //              lastUserStatus.update(phone_no, ("7", startTimeLong / 1000, 0))
+            //            }
+            //            else if (tuoxianFunc) {
+            //              lastUserStatus.update(phone_no, ("25", startTimeLong / 1000, 0))
+            //            }
+            //            if (huhehaoteFunc) {
+            //              lastUserStatus.update(phone_no, ("27", startTimeLong / 1000, 0))
+            //            }
           }
 
-          //          （未离开过的用户不在鄂伦春基站）说明此用户离开了鄂伦春旗
-          //          if (elunchunNotLeaveUser.contains(phone_no)
-          //            &&
-          //            !elunchun.contains(lac_ci)) {
-          //            //            向已经离开集合中增加一条新用户的离开信息
-          //            elunchunLeaveUser.update(phone_no, "1")
-          //            //            删除未离开用户集合
-          //            elunchunNotLeaveUser.remove(phone_no)
-          //            //            向需要更新的用户表增加一条记录
-          //            newElunchunPutMap.update(phone_no, "1")
-          //          }
-
-          if (chifengNotLeaveLeaders.contains(phone_no)
-            && !local_city.equals("0476")
-          ) {
-            //            向赤峰离开过的领导的集合中增加一条新用户的离开信息
-            chifengLeaveLeaders.update(phone_no, "1")
-            //            删除未离开用户集合
-            chifengNotLeaveLeaders.remove(phone_no)
-            //            向需要更新的赤峰领导表增加一条记录
-            newChifengLeaderPutMap.update(phone_no, "1")
+          //          1.判断领导是否离开去了外地
+          //          2.判断领导是否从外地返回，并发出信息
+          def judgeLeaderStatus(leaderStatus: mutable.HashMap[String, (String, String)]
+                                , eventType: String
+                                , localCity: String
+                                , judgeFunc: Boolean): Unit = {
+            if (leaderStatus.contains(phone_no)) {
+              val leaveFlag = leaderStatus(phone_no)._2
+              //            鄂尔多斯领导离开了本地
+              if ("0".equals(leaveFlag) && !local_city.equals(localCity)) {
+                leaderStatus.update(phone_no, (eventType, "1"))
+                putLeadersStatusMap.update(phone_no, (eventType, "1"))
+              }
+              //            鄂尔多斯领导回到了本地
+              if ("1".equals(leaveFlag) && judgeFunc) {
+                kafkaProducer.value.send(targetTopic, eventType + "|" + stringLine)
+                leaderStatus.update(phone_no, (eventType, "0"))
+                putLeadersStatusMap.update(phone_no, (eventType, "0"))
+              }
+            }
           }
-
-          //          如果赤峰已经离开的领导回到了赤峰
-          if (chifengLeaveLeaders.contains(phone_no) && local_city.equals("0476")) {
-            kafkaProducer.value.send(targetTopic, "2|" + stringLine)
-            //            将更新赤峰领导信息重置回0
-
-            newChifengLeaderPutMap.update(phone_no, "0")
-          }
-
+          //          鄂尔多斯7，领导
+          judgeLeaderStatus(eerduosiLeadersStatus, "7", "0477", eerduosiLeadersFunc)
+          //          赤峰2，领导
+          judgeLeaderStatus(chifengLeadersStatus, "2", "0476", chifengLeaderFunc)
 
         })
-
-        //        将鄂伦春离开的过得用户更新入表中
-        //        hunValue.putByKeyColumnList_USER(conn, "TourMasUsualUser", newElunchunPutMap.toList)
-
-        hunValue.putByKeyColumnList_Leader(conn, "TourMasLeaderUser", newChifengLeaderPutMap.toList)
-
-
+        //        将领导的状态信息更新
+        hunValue.putByKeyColumnList_Leader(conn, "TourMasLeaderUser", putLeadersStatusMap.toList)
         //        更新新进入计时区域和驻留时长更新区域的用户
         val putResultList: List[(String, (String, Long, Long))] = lastUserStatus
           .filter(!_._2._1.equals("X"))
@@ -448,21 +370,14 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
           .map(_._1)
           .toList
         hunValue.deleteRows("TourMasUser", delResultList)
-
-
         if (conn != null) conn.close()
-
       }
       )
-
     })
-
 
     ssc.start()
     ssc.awaitTermination()
     ssc.stop()
-
   }
-
 }
 

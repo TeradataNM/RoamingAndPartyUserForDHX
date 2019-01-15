@@ -191,18 +191,19 @@ class HbaseUtilNew extends Serializable {
     }
   }
 
-  def putByKeyColumnList_Leader(conn: Connection, tableName: String, resultList: List[(String, String)]): Unit = {
+  def putByKeyColumnList_Leader(conn: Connection, tableName: String, resultList: List[(String, (String, String))]): Unit = {
     val table = conn.getTable(TableName.valueOf(tableName))
     try {
       val muList = new ListBuffer[Put]
 
       resultList.foreach(res => {
         val phone_no = res._1
-        val flag = res._2
+        val (qualifier, value) = res._2
 
         muList.add(
           new Put(phone_no.getBytes)
-            .addColumn("0".getBytes(), "flag".getBytes(), flag.getBytes())
+            .addColumn("0".getBytes(), qualifier.getBytes(), value.getBytes())
+
         )
       })
 
@@ -330,10 +331,10 @@ class HbaseUtilNew extends Serializable {
     results
   }
 
-  def getResultByKeyList_Leader(conn: Connection, tableName: String, family: String, qualiafier: String, keyList: List[String]): mutable.HashMap[String, String] = {
+
+  def getResultByKeyList_Leader(conn: Connection, tableName: String, family: String, keyList: List[String]): mutable.HashMap[String, (String, String)] = {
     val table = conn.getTable(TableName.valueOf(tableName))
-    val results: mutable.HashMap[String, String] = new scala.collection.mutable.HashMap
-    val area = new AreaList
+    val results: mutable.HashMap[String, (String, String)] = new scala.collection.mutable.HashMap
     try {
       val muList = new ListBuffer[Get]
       keyList.foreach(phone_no => {
@@ -341,28 +342,22 @@ class HbaseUtilNew extends Serializable {
           new Get(phone_no.getBytes).addFamily("0".getBytes())
         )
       })
-
-      table.get(muList).foreach(result => {
-        if (!result.isEmpty) {
-          val phoneNo = Bytes.toString(result.getRow)
-          try {
-            //              只查找离开过得用户
-            val flag = Bytes.toString(result.getValue("0".getBytes(), "flag".getBytes()))
-            if (flag != null) results.update(phoneNo, flag)
-            else results.update(phoneNo, "0")
-          } catch {
-            case e => None
-          }
-
-        }
+      val result = table.get(muList)
+      result.foreach(r => {
+        val cells = r.rawCells()
+        cells.foreach(cell => {
+          val phoneNo = Bytes.toString(cell.getRow)
+          val eventType = Bytes.toString(cell.getQualifier)
+          val leaveFlag = Bytes.toString(cell.getValue)
+          results.update(phoneNo, (eventType, leaveFlag))
+        })
       })
-
-
     } finally {
       if (table != null) table.close()
     }
 
     results
+
   }
 
   def getResultByFilter(tableName: String): ListBuffer[String] = {
