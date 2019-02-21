@@ -2,6 +2,7 @@ package utils
 
 import java.util
 
+import area.AreaList
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp

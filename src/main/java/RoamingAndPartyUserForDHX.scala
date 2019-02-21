@@ -1,6 +1,7 @@
 
 import java.util.{Calendar, Properties}
 
+import area._
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.common.serialization.StringSerializer
@@ -162,11 +163,15 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val area = new AreaList
         val xinganmengArea = new xinganmengAreaList
         val fengzhenArea = new fengzhenAreaList
-        val xinganmengWuchakouArea = new XinganmengWuchakouArea
+        val xinganmengWuchakouAreaList = new XinganmengWuchakouAreaList
         val ganqimaoduAreaList = new GanqimaoduAreaList
         val xinghexianAreaList = new XinghexianAreaList
         val chenbaerhuqiAreaList = new ChenbaerhuqiAreaList
         val eerduosiAreaList = new EerduosiAreaList
+        val elunchunJijianjianchaAreaList = new ElunchunJijianjianchaAreaList
+        val elunchungonganjuAreaList = new ElunchungonganjuAreaList
+        val erlianhaotexuanchuanbuAreaList = new ErlianhaotexuanchuanbuAreaList
+
         val aershanLacCiList = area.aershanLacCiList
         val xinBaerhuzuoqi = area.xinBaerhuzuoqi
         val erlianhaote = area.erlianhaote
@@ -186,13 +191,16 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val dengkousanshenggong = area.dengkousanshenggong
         val fengzheng = fengzhenArea.fengzheng
         val tuoxian = area.tuoxian
-        val xinganmengWuchakou = xinganmengWuchakouArea.xinganmengWuchakouSet
+        val xinganmengWuchakou = xinganmengWuchakouAreaList.xinganmengWuchakouSet
         val ganqimaodu = ganqimaoduAreaList.ganqimaoduAreaSet
         val wulatehouqi = area.wulatehouqi
         val xinghexian = xinghexianAreaList.xinghexian
         val chenbaerhuqi = chenbaerhuqiAreaList.chenbaerhuqi
         val eerduosi = eerduosiAreaList.eerduosi
         val eerduosiLeaders = eerduosiAreaList.eerduosiLeaders
+        val elunchunJijianjiancha = elunchunJijianjianchaAreaList.elunchunJijianjiancha
+        val elunchungonganju = elunchungonganjuAreaList.elunchungonganju
+        val erlianhaotexuanchuanbu = erlianhaotexuanchuanbuAreaList.erlianhaotexuanchuanbu
 
         partition
           .toList
@@ -244,48 +252,55 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             if (manzhouli.contains(lac_ci)) send(18)
             //              甘其毛都29
             if (ganqimaodu.contains(lac_ci)) send(29)
+            //              鄂伦春纪检监察34
+            if (elunchunJijianjiancha.contains(lac_ci)) send(34)
+            //              鄂伦春公安局35
+            if (elunchungonganju.contains(lac_ci)) send(35)
+            //            二连浩特宣传部36
+            if (erlianhaotexuanchuanbu.contains(lac_ci)) send(36)
             //              包头移动17
-            else if (baotouyidong.contains(lac_ci)) send(17)
+            if (baotouyidong.contains(lac_ci)) send(17)
             //              四子王旗19
-            else if (siziwangqi.contains(lac_ci)) send(19)
+            if (siziwangqi.contains(lac_ci)) send(19)
             //            阿尔山5
+            if (local_city.equals("0482")) send(5)
             //            else if (local_city.equals("0482") && aershanLacCiList.contains(lac_ci)) {
-            else if (local_city.equals("0482")) send(5)
+
             //              漫入人群
-            else {
-              if (!roam_type.equals("4") && !roam_type.equals("")) {
-                //                呼和浩特27
-                if (local_city.equals("0471") && !owner_city.equals("0471")) send(27)
-                //                翁牛特旗22
-                if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
-                //                乌兰察布，丰镇26
-                if (local_city.equals("0474") && fengzheng.contains(lac_ci)) send(26)
-                //                磴口三盛公景区24
-                if (local_city.equals("0478") && dengkousanshenggong.contains(lac_ci)) send(24)
-                //            漫入赤峰人群(所在地市，漫游类型)id:12
-                else if (local_city.equals("0476")) send(12)
-                //            新巴尔虎左旗6
-                else if (local_city.equals("0470") && xinBaerhuzuoqi.contains(lac_ci)) send(6)
-                //            陈巴尔虎旗31
-                else if (local_city.equals("0470") && chenbaerhuqi.contains(lac_ci)) send(31)
-                //            二连浩特3
-                else if (local_city.equals("0479") && erlianhaote.contains(lac_ci)) send(3)
-                //            锡林郭勒乌拉盖4
-                else if (local_city.equals("0479") && wulagai.contains(lac_ci)) send(4)
-                //              阿拉善右旗8
-                else if (local_city.equals("0483") && alashan.contains(lac_ci)) send(8)
-                //              乌兰察布10
-                else if (local_city.equals("0474") && wulanchabu.contains(lac_ci)) send(10)
-                //              阿拉善额济纳旗13
-                else if (local_city.equals("0483") && ejinaqi.contains(lac_ci)) send(13)
-                //                  科尔沁右翼中旗20
-                else if (local_city.equals("0482") && keerqinyouyizhongqi.contains(lac_ci)) send(20)
-                //                  呼和浩特，托县25
-                else if (local_city.equals("0471") && tuoxian.contains(lac_ci)) send(25)
-                //                鄂尔多斯7
-                else if (local_city.equals("0477") && eerduosi.contains(lac_ci)) send(7)
-              }
+
+            if (!roam_type.equals("4") && !roam_type.equals("")) {
+              //                呼和浩特27
+              if (local_city.equals("0471") && !owner_city.equals("0471")) send(27)
+              //                翁牛特旗22
+              if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
+              //                乌兰察布，丰镇26
+              if (local_city.equals("0474") && fengzheng.contains(lac_ci)) send(26)
+              //                磴口三盛公景区24
+              if (local_city.equals("0478") && dengkousanshenggong.contains(lac_ci)) send(24)
+              //            漫入赤峰人群(所在地市，漫游类型)id:12
+              else if (local_city.equals("0476")) send(12)
+              //            新巴尔虎左旗6
+              else if (local_city.equals("0470") && xinBaerhuzuoqi.contains(lac_ci)) send(6)
+              //            陈巴尔虎旗31
+              else if (local_city.equals("0470") && chenbaerhuqi.contains(lac_ci)) send(31)
+              //            二连浩特3
+              else if (local_city.equals("0479") && erlianhaote.contains(lac_ci)) send(3)
+              //            锡林郭勒乌拉盖4
+              else if (local_city.equals("0479") && wulagai.contains(lac_ci)) send(4)
+              //              阿拉善右旗8
+              else if (local_city.equals("0483") && alashan.contains(lac_ci)) send(8)
+              //              乌兰察布10
+              else if (local_city.equals("0474") && wulanchabu.contains(lac_ci)) send(10)
+              //              阿拉善额济纳旗13
+              else if (local_city.equals("0483") && ejinaqi.contains(lac_ci)) send(13)
+              //                  科尔沁右翼中旗20
+              else if (local_city.equals("0482") && keerqinyouyizhongqi.contains(lac_ci)) send(20)
+              //                  呼和浩特，托县25
+              else if (local_city.equals("0471") && tuoxian.contains(lac_ci)) send(25)
+              //                鄂尔多斯7
+              else if (local_city.equals("0477") && eerduosi.contains(lac_ci)) send(7)
             }
+
           })
       }
       )
