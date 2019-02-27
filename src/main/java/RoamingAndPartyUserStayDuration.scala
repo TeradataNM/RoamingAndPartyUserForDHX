@@ -172,12 +172,12 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             lac + "|" +
             ci
 
-          val chifengFunc = {
+          /*val chifengFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
               && local_city.equals("0476")
               && !owner_city.equals("0476")) true else false
-          }
+          }*/
           val elunchunFunc = {
             if (
             //              如果用户是漫入到鄂伦春的
@@ -295,11 +295,11 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             }
             //            漫入赤峰人群(所在地市，漫游类型)id:2
             //              赤峰2
-            if (lastEventType.equals("2")) judgeUserStayDuration(chifengFunc, 3600L)
+            //            if (lastEventType.equals("2")) judgeUserStayDuration(chifengFunc, 3600L)
             //            鄂伦春11
-            else if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
+            if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
             //              通辽9
-            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 1800L)
+            //            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 1800L)
             //            巴丹吉林旅游区14
             else if (lastEventType.equals("14")) judgeUserStayDuration(badanjilinFunc, 3600L)
             //              红花尔基15
@@ -322,11 +322,11 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               lastUserStatus.update(phone_no, (eventType, startTimeLong / 1000, 0))
             }
             //                漫入赤峰，更新临时列表
-            if (chifengFunc) updateStatus("2")
+            //            if (chifengFunc) updateStatus("2")
             //            鄂伦春11
-            else if (elunchunFunc) updateStatus("11")
+            if (elunchunFunc) updateStatus("11")
             //              通辽9
-            else if (tongliaoFunc) updateStatus("9")
+            //            else if (tongliaoFunc) updateStatus("9")
             //            巴丹吉林旅游区14
             else if (badanjilinFunc) updateStatus("14")
             //              红花尔基15
@@ -370,7 +370,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
           //          鄂尔多斯7，领导
           judgeLeaderStatus(eerduosiLeadersStatus, "7", "0477", eerduosiLeadersFunc)
           //          赤峰2，领导
-          judgeLeaderStatus(chifengLeadersStatus, "2", "0476", chifengLeaderFunc)
+          //          judgeLeaderStatus(chifengLeadersStatus, "2", "0476", chifengLeaderFunc)
 
         })
         //        将领导的状态信息更新

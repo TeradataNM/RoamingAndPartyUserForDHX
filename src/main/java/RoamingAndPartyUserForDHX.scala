@@ -239,17 +239,17 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             //            公安人群32
             if (gonganCustSet.contains(phone_no)) send(32)
             //              兴安盟农牧业局21
-            if (roam_type.equals("4") && (xinganmengnongmuyeju1.contains(lac_ci)
-              || xinganmengnongmuyeju2.contains(lac_ci)
-              || xinganmengnongmuyeju3.contains(lac_ci)
-              )
-            ) send(21)
+            //            if (roam_type.equals("4") && (xinganmengnongmuyeju1.contains(lac_ci)
+            //              || xinganmengnongmuyeju2.contains(lac_ci)
+            //              || xinganmengnongmuyeju3.contains(lac_ci)
+            //              )
+            //            ) send(21)
             //                  乌拉特后旗30
-            if (local_city.equals("0478") && wulatehouqi.contains(lac_ci)) send(30)
+            //            if (local_city.equals("0478") && wulatehouqi.contains(lac_ci)) send(30)
             //                兴安盟五岔沟28
-            if (xinganmengWuchakou.contains(lac_ci)) send(28)
+            //            if (xinganmengWuchakou.contains(lac_ci)) send(28)
             //            满洲里18
-            if (manzhouli.contains(lac_ci)) send(18)
+            //            if (manzhouli.contains(lac_ci)) send(18)
             //              甘其毛都29
             if (ganqimaodu.contains(lac_ci)) send(29)
             //              鄂伦春纪检监察34
@@ -261,7 +261,7 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             //              包头移动17
             if (baotouyidong.contains(lac_ci)) send(17)
             //              四子王旗19
-            if (siziwangqi.contains(lac_ci)) send(19)
+            //            if (siziwangqi.contains(lac_ci)) send(19)
             //            阿尔山5
             if (local_city.equals("0482")) send(5)
             //            else if (local_city.equals("0482") && aershanLacCiList.contains(lac_ci)) {
@@ -276,7 +276,7 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
               //                乌兰察布，丰镇26
               if (local_city.equals("0474") && fengzheng.contains(lac_ci)) send(26)
               //                磴口三盛公景区24
-              if (local_city.equals("0478") && dengkousanshenggong.contains(lac_ci)) send(24)
+              //              if (local_city.equals("0478") && dengkousanshenggong.contains(lac_ci)) send(24)
               //            漫入赤峰人群(所在地市，漫游类型)id:12
               else if (local_city.equals("0476")) send(12)
               //            新巴尔虎左旗6
@@ -284,17 +284,17 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
               //            陈巴尔虎旗31
               else if (local_city.equals("0470") && chenbaerhuqi.contains(lac_ci)) send(31)
               //            二连浩特3
-              else if (local_city.equals("0479") && erlianhaote.contains(lac_ci)) send(3)
+              //              else if (local_city.equals("0479") && erlianhaote.contains(lac_ci)) send(3)
               //            锡林郭勒乌拉盖4
-              else if (local_city.equals("0479") && wulagai.contains(lac_ci)) send(4)
+              //              else if (local_city.equals("0479") && wulagai.contains(lac_ci)) send(4)
               //              阿拉善右旗8
-              else if (local_city.equals("0483") && alashan.contains(lac_ci)) send(8)
+              //              else if (local_city.equals("0483") && alashan.contains(lac_ci)) send(8)
               //              乌兰察布10
               else if (local_city.equals("0474") && wulanchabu.contains(lac_ci)) send(10)
               //              阿拉善额济纳旗13
               else if (local_city.equals("0483") && ejinaqi.contains(lac_ci)) send(13)
               //                  科尔沁右翼中旗20
-              else if (local_city.equals("0482") && keerqinyouyizhongqi.contains(lac_ci)) send(20)
+              //              else if (local_city.equals("0482") && keerqinyouyizhongqi.contains(lac_ci)) send(20)
               //                  呼和浩特，托县25
               else if (local_city.equals("0471") && tuoxian.contains(lac_ci)) send(25)
               //                鄂尔多斯7
