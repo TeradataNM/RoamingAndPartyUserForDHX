@@ -20,12 +20,12 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
   var lastTime = Calendar.getInstance().getTime
   var gonganLastTime = Calendar.getInstance().getTime
   val timeFreq: Long = 300000L
-  val gonganTimeFreq: Long = timeFreq * 12 * 3
+  val gonganTimeFreq: Long = timeFreq
 
   def main(args: Array[String]) {
     val sparkConfig = new SparkConfig
     val conf = sparkConfig.getConf.setAppName("RoamingAndPartyUserForDHX")
-    val ssc = new StreamingContext(conf, Seconds(120))
+    val ssc = new StreamingContext(conf, Seconds(20))
     val hun = new HbaseUtilNew
 
 
@@ -171,6 +171,11 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val elunchunJijianjianchaAreaList = new ElunchunJijianjianchaAreaList
         val elunchungonganjuAreaList = new ElunchungonganjuAreaList
         val erlianhaotexuanchuanbuAreaList = new ErlianhaotexuanchuanbuAreaList
+        val yijinhuoluoqiAreaList = new YijinhuoluoqiAreaList
+        val elunchunqiweixuanchuanbuAreaList = new ElunchunqiweixuanchuanbuAreaList
+        val genheAlongshanAreaList = new GenheAlongshanAreaList
+        val tuoketuoxianAreaList = new TuoketuoxianAreaList
+
 
         val aershanLacCiList = area.aershanLacCiList
         val xinBaerhuzuoqi = area.xinBaerhuzuoqi
@@ -187,10 +192,9 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val xinganmengnongmuyeju1 = xinganmengArea.xinganmengnongmuyeju1
         val xinganmengnongmuyeju2 = xinganmengArea.xinganmengnongmuyeju2
         val xinganmengnongmuyeju3 = xinganmengArea.xinganmengnongmuyeju3
-        val wengniute = area.wengniute
         val dengkousanshenggong = area.dengkousanshenggong
         val fengzheng = fengzhenArea.fengzheng
-        val tuoxian = area.tuoxian
+        val tuoketuoxian = tuoketuoxianAreaList.tuoketuoxian
         val xinganmengWuchakou = xinganmengWuchakouAreaList.xinganmengWuchakouSet
         val ganqimaodu = ganqimaoduAreaList.ganqimaoduAreaSet
         val wulatehouqi = area.wulatehouqi
@@ -201,6 +205,9 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val elunchunJijianjiancha = elunchunJijianjianchaAreaList.elunchunJijianjiancha
         val elunchungonganju = elunchungonganjuAreaList.elunchungonganju
         val erlianhaotexuanchuanbu = erlianhaotexuanchuanbuAreaList.erlianhaotexuanchuanbu
+        val yijinhuoluoqi = yijinhuoluoqiAreaList.yijinhuoluoqi
+        val elunchunqiweixuanchuanbu = elunchunqiweixuanchuanbuAreaList.elunchunqiweixuanchuanbu
+        val genheAlongshan = genheAlongshanAreaList.genheAlongshan
 
         partition
           .toList
@@ -247,17 +254,21 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             //                  乌拉特后旗30
             //            if (local_city.equals("0478") && wulatehouqi.contains(lac_ci)) send(30)
             //                兴安盟五岔沟28
-            //            if (xinganmengWuchakou.contains(lac_ci)) send(28)
+            if (xinganmengWuchakou.contains(lac_ci)) send(28)
             //            满洲里18
             //            if (manzhouli.contains(lac_ci)) send(18)
             //              甘其毛都29
             if (ganqimaodu.contains(lac_ci)) send(29)
             //              鄂伦春纪检监察34
-            if (elunchunJijianjiancha.contains(lac_ci)) send(34)
+            //            if (elunchunJijianjiancha.contains(lac_ci)) send(34)
             //              鄂伦春公安局35
             if (elunchungonganju.contains(lac_ci)) send(35)
+            //              鄂伦春旗委宣传部11
+            if (elunchunqiweixuanchuanbu.contains(lac_ci)) send(11)
             //            二连浩特宣传部36
             if (erlianhaotexuanchuanbu.contains(lac_ci)) send(36)
+            //            根河阿龙山39
+            if (genheAlongshan.contains(lac_ci)) send(39)
             //              包头移动17
             if (baotouyidong.contains(lac_ci)) send(17)
             //              四子王旗19
@@ -266,13 +277,15 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             if (local_city.equals("0482")) send(5)
             //            else if (local_city.equals("0482") && aershanLacCiList.contains(lac_ci)) {
 
-            //              漫入人群
 
+            //              漫入人群
             if (!roam_type.equals("4") && !roam_type.equals("")) {
               //                呼和浩特27
               if (local_city.equals("0471") && !owner_city.equals("0471")) send(27)
               //                翁牛特旗22
-              if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
+//              if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
+              //                伊金霍洛旗37
+              if (local_city.equals("0477") && yijinhuoluoqi.contains(lac_ci)) send(37)
               //                乌兰察布，丰镇26
               if (local_city.equals("0474") && fengzheng.contains(lac_ci)) send(26)
               //                磴口三盛公景区24
@@ -296,15 +309,20 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
               //                  科尔沁右翼中旗20
               //              else if (local_city.equals("0482") && keerqinyouyizhongqi.contains(lac_ci)) send(20)
               //                  呼和浩特，托县25
-              else if (local_city.equals("0471") && tuoxian.contains(lac_ci)) send(25)
+              //              else if (local_city.equals("0471") && tuoxian.contains(lac_ci)) send(25)
               //                鄂尔多斯7
               else if (local_city.equals("0477") && eerduosi.contains(lac_ci)) send(7)
             }
-
+            //            非漫入人群
+            else {
+              //            呼和浩特，托克托县25
+              if (local_city.equals("0471")
+                && tuoketuoxian.contains(lac_ci)
+                && owner_city.equals("0471")) send(25)
+            }
           })
       }
       )
-
     })
 
 

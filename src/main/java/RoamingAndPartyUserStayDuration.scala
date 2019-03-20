@@ -1,7 +1,7 @@
 
 import java.util.{Calendar, Properties}
 
-import area.{AreaList, EerduosiAreaList, WulanhaoteAreaList}
+import area.{AreaList, EerduosiAreaList, WengniuteAreaList, WulanhaoteAreaList}
 import kafka.serializer.StringDecoder
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.{HashPartitioner, SparkContext}
@@ -121,6 +121,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val area = new AreaList
         val eerduosiArea = new EerduosiAreaList
         val wulanhaoteAreaList = new WulanhaoteAreaList
+        val wengniuteAreaList = new WengniuteAreaList
 
         val hunValue = hunBro.value
         val conn = hunValue.createHbaseConnection
@@ -129,9 +130,10 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val gansu_ningxia_haoduan = gansu_ningxia_haoduan_bro.value
         val honghuaerji = area.honghuaerji
         val wulanbuhe = area.wulanbuhe
-        val tuoxian = area.tuoxian
+        //        val tuoxian = area.tuoxian
         val eerduosi = eerduosiArea.eerduosi
         val wulanhaote = wulanhaoteAreaList.wulanhaote
+        val wengniute = wengniuteAreaList.wengniute
 
 
         val sortedPartition = partition.toList.sortBy(_._2._1._2)
@@ -237,14 +239,14 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               && !owner_city.equals("0483")
             ) true else false
           }
-          val tuoxianFunc = {
+          /*val tuoxianFunc = {
             if (tuoxian.contains(lac_ci)
               && !roam_type.equals("4")
               && !roam_type.equals("")
               && local_city.equals("0471")
               && !owner_city.equals("0471")
             ) true else false
-          }
+          }*/
           val huhehaoteFunc = {
             if (!roam_type.equals("4")
               && !roam_type.equals("")
@@ -264,6 +266,13 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
           }
           val chifengLeaderFunc = {
             if (local_city.equals("0476")) true else false
+          }
+          val wengniuteFunc = {
+            if (!roam_type.equals("4")
+              && !roam_type.equals("")
+              && local_city.equals("0476")
+              && wengniute.contains(lac_ci)
+            ) true else false
           }
 
 
@@ -297,17 +306,19 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             //              赤峰2
             //            if (lastEventType.equals("2")) judgeUserStayDuration(chifengFunc, 3600L)
             //            鄂伦春11
-            if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
+            //if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
             //              通辽9
             //            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 1800L)
             //            巴丹吉林旅游区14
-            else if (lastEventType.equals("14")) judgeUserStayDuration(badanjilinFunc, 3600L)
+            if (lastEventType.equals("14")) judgeUserStayDuration(badanjilinFunc, 3600L)
             //              红花尔基15
             else if (lastEventType.equals("15")) judgeUserStayDuration(honghuaerjiFunc, 1800L)
-            //            阿拉善乌兰布和23
+            //            阿拉善,乌兰布和23
             else if (lastEventType.equals("23")) judgeUserStayDuration(wulanbuheFunc, 3600L)
-            //            兴安盟乌兰浩特33
+            //            兴安盟,乌兰浩特33
             else if (lastEventType.equals("33")) judgeUserStayDuration(wulanhaoteFunc, 3600L * 3)
+            //            赤峰，翁牛特旗22
+            else if (lastEventType.equals("22")) judgeUserStayDuration(wengniuteFunc, 3600L * 5)
             //              托县25
             //            else if (lastEventType.equals("25")) {
             //              judgeUserStayDuration(tuoxianFunc, 600L)
@@ -324,17 +335,19 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             //                漫入赤峰，更新临时列表
             //            if (chifengFunc) updateStatus("2")
             //            鄂伦春11
-            if (elunchunFunc) updateStatus("11")
+            //            if (elunchunFunc) updateStatus("11")
             //              通辽9
             //            else if (tongliaoFunc) updateStatus("9")
             //            巴丹吉林旅游区14
-            else if (badanjilinFunc) updateStatus("14")
+            if (badanjilinFunc) updateStatus("14")
             //              红花尔基15
             else if (honghuaerjiFunc) updateStatus("15")
             //            阿拉善乌兰布和23
             else if (wulanbuheFunc) updateStatus("23")
             //            兴安盟乌兰浩特33
             else if (wulanhaoteFunc) updateStatus("33")
+            //            赤峰，翁牛特旗22
+            else if (wengniuteFunc) updateStatus("22")
             //            else if (eerduosiFunc) {
             //              lastUserStatus.update(phone_no, ("7", startTimeLong / 1000, 0))
             //            }
