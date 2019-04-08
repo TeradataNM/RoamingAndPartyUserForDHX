@@ -175,7 +175,13 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val elunchunqiweixuanchuanbuAreaList = new ElunchunqiweixuanchuanbuAreaList
         val genheAlongshanAreaList = new GenheAlongshanAreaList
         val tuoketuoxianAreaList = new TuoketuoxianAreaList
-
+        val genhelinyejuAreaList = new GenhelinyejuAreaList
+        val chuoyuanlinyejuAreaList = new ChuoyuanlinyejuAreaList
+        val bailanglinyejuAreaList = new BailanglinyejuAreaList
+        val dalateqiAreaList = new DalateqiAreaList
+        val mianduheAreaList = new MianduheAreaList
+        val wuerqiAreaList = new WuerqiAreaList
+        val baotounongshanghangAreaList = new BaotounongshanghangAreaList
 
         val aershanLacCiList = area.aershanLacCiList
         val xinBaerhuzuoqi = area.xinBaerhuzuoqi
@@ -208,6 +214,13 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
         val yijinhuoluoqi = yijinhuoluoqiAreaList.yijinhuoluoqi
         val elunchunqiweixuanchuanbu = elunchunqiweixuanchuanbuAreaList.elunchunqiweixuanchuanbu
         val genheAlongshan = genheAlongshanAreaList.genheAlongshan
+        val bailanglinyeju = bailanglinyejuAreaList.bailanglinyeju
+        val chuoyuanlinyeju = chuoyuanlinyejuAreaList.chuoyuanlinyeju
+        val genhelinyeju = genheAlongshanAreaList.genheAlongshan
+        val dalateqi = dalateqiAreaList.dalateqi
+        val mianduhe = mianduheAreaList.mianduhe
+        val wuerqi = wuerqiAreaList.wuerqi
+        val baotounongshanghang = baotounongshanghangAreaList.baotounongshanghang
 
         partition
           .toList
@@ -260,7 +273,7 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             //              甘其毛都29
             if (ganqimaodu.contains(lac_ci)) send(29)
             //              鄂伦春纪检监察34
-            //            if (elunchunJijianjiancha.contains(lac_ci)) send(34)
+            if (elunchunJijianjiancha.contains(lac_ci)) send(34)
             //              鄂伦春公安局35
             if (elunchungonganju.contains(lac_ci)) send(35)
             //              鄂伦春旗委宣传部11
@@ -269,8 +282,16 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
             if (erlianhaotexuanchuanbu.contains(lac_ci)) send(36)
             //            根河阿龙山39
             if (genheAlongshan.contains(lac_ci)) send(39)
+            //            兴安盟，白狼林业局42
+            if (bailanglinyeju.contains(lac_ci)) send(42)
             //              包头移动17
             if (baotouyidong.contains(lac_ci)) send(17)
+            //            呼伦贝尔，绰源林业局40
+            if (chuoyuanlinyeju.contains(lac_ci)) send(40)
+            //            呼伦贝尔，牙克石，免渡河44
+            if (mianduhe.contains(lac_ci)) send(44)
+            //            呼伦贝尔，牙克石，乌尔旗45
+            if (wuerqi.contains(lac_ci)) send(45)
             //              四子王旗19
             //            if (siziwangqi.contains(lac_ci)) send(19)
             //            阿尔山5
@@ -280,22 +301,28 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
 
             //              漫入人群
             if (!roam_type.equals("4") && !roam_type.equals("")) {
+              //              省内漫游
+
               //                呼和浩特27
               if (local_city.equals("0471") && !owner_city.equals("0471")) send(27)
               //                翁牛特旗22
-//              if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
-              //                伊金霍洛旗37
+              //              if (local_city.equals("0476") && wengniute.contains(lac_ci)) send(22)
+              //                鄂尔多斯，伊金霍洛旗37
               if (local_city.equals("0477") && yijinhuoluoqi.contains(lac_ci)) send(37)
+              //              鄂尔多斯，达拉特旗43
+              if (local_city.equals("0477") && dalateqi.contains(lac_ci)) send(43)
               //                乌兰察布，丰镇26
               if (local_city.equals("0474") && fengzheng.contains(lac_ci)) send(26)
               //                磴口三盛公景区24
               //              if (local_city.equals("0478") && dengkousanshenggong.contains(lac_ci)) send(24)
               //            漫入赤峰人群(所在地市，漫游类型)id:12
               else if (local_city.equals("0476")) send(12)
-              //            新巴尔虎左旗6
+              //            呼伦贝尔，新巴尔虎左旗6
               else if (local_city.equals("0470") && xinBaerhuzuoqi.contains(lac_ci)) send(6)
-              //            陈巴尔虎旗31
+              //            呼伦贝尔，陈巴尔虎旗31
               else if (local_city.equals("0470") && chenbaerhuqi.contains(lac_ci)) send(31)
+              //            呼伦贝尔，根河林业局41
+              else if (local_city.equals("0470") && genhelinyeju.contains(lac_ci)) send(41)
               //            二连浩特3
               //              else if (local_city.equals("0479") && erlianhaote.contains(lac_ci)) send(3)
               //            锡林郭勒乌拉盖4
@@ -319,6 +346,10 @@ object RoamingAndPartyUserForDHX extends TimeFunc with Serializable {
               if (local_city.equals("0471")
                 && tuoketuoxian.contains(lac_ci)
                 && owner_city.equals("0471")) send(25)
+
+              if (Set("3", "4").contains(roam_type)) {
+                if (baotounongshanghang.contains(lac_ci)) send(46)
+              }
             }
           })
       }

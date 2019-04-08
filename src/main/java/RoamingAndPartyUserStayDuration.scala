@@ -307,8 +307,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             //            if (lastEventType.equals("2")) judgeUserStayDuration(chifengFunc, 3600L)
             //            鄂伦春11
             //if (lastEventType.equals("11")) judgeUserStayDuration(elunchunFunc, 600L)
-            //              通辽9
-            //            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 1800L)
+
             //            巴丹吉林旅游区14
             if (lastEventType.equals("14")) judgeUserStayDuration(badanjilinFunc, 3600L)
             //              红花尔基15
@@ -319,6 +318,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             else if (lastEventType.equals("33")) judgeUserStayDuration(wulanhaoteFunc, 3600L * 3)
             //            赤峰，翁牛特旗22
             else if (lastEventType.equals("22")) judgeUserStayDuration(wengniuteFunc, 3600L * 5)
+            //              通辽9
+            else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 60L * 4)
             //              托县25
             //            else if (lastEventType.equals("25")) {
             //              judgeUserStayDuration(tuoxianFunc, 600L)
@@ -336,8 +337,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             //            if (chifengFunc) updateStatus("2")
             //            鄂伦春11
             //            if (elunchunFunc) updateStatus("11")
-            //              通辽9
-            //            else if (tongliaoFunc) updateStatus("9")
+
             //            巴丹吉林旅游区14
             if (badanjilinFunc) updateStatus("14")
             //              红花尔基15
@@ -348,6 +348,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             else if (wulanhaoteFunc) updateStatus("33")
             //            赤峰，翁牛特旗22
             else if (wengniuteFunc) updateStatus("22")
+            //              通辽9
+            else if (tongliaoFunc) updateStatus("9")
             //            else if (eerduosiFunc) {
             //              lastUserStatus.update(phone_no, ("7", startTimeLong / 1000, 0))
             //            }
