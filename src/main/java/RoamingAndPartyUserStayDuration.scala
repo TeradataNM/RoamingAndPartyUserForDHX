@@ -143,7 +143,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val lastUserStatus = hunValue.getResultByKeyList_MAS(conn, "TourMasUser", distinctPartition)
 
         //        内蒙领导离开状态查询结果
-        val leadersStatus = hunValue.getResultByKeyList_Leader(conn, "TourMasLeaderUser", "0", distinctPartition)
+        val leadersStatus: mutable.HashMap[String, (String, String)]
+        = hunValue.getResultByKeyList_Leader(conn, "TourMasLeaderUser", "0", distinctPartition)
         val chifengLeadersStatus = leadersStatus.filter(_._2._1.equals("2"))
         val eerduosiLeadersStatus = leadersStatus.filter(_._2._1.equals("7"))
 
@@ -369,12 +370,12 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
                                 , judgeFunc: Boolean): Unit = {
             if (leaderStatus.contains(phone_no)) {
               val leaveFlag = leaderStatus(phone_no)._2
-              //            鄂尔多斯领导离开了本地
+              //            鄂尔多斯领导离开了本地，状态初始值为0，且领导不在本地时，将状态置为离开状态1
               if ("0".equals(leaveFlag) && !local_city.equals(localCity)) {
                 leaderStatus.update(phone_no, (eventType, "1"))
                 putLeadersStatusMap.update(phone_no, (eventType, "1"))
               }
-              //            鄂尔多斯领导回到了本地
+              //            鄂尔多斯领导回到了本地，当状态为1，且此时在本地时
               if ("1".equals(leaveFlag) && judgeFunc) {
                 kafkaProducer.value.send(targetTopic, eventType + "|" + stringLine)
                 leaderStatus.update(phone_no, (eventType, "0"))
@@ -382,8 +383,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
               }
             }
           }
-          //          鄂尔多斯7，领导
-          judgeLeaderStatus(eerduosiLeadersStatus, "7", "0477", eerduosiLeadersFunc)
+          //          鄂尔多斯7，领导（hbase配置ID为7，发送ID为47）
+          judgeLeaderStatus(eerduosiLeadersStatus, "47", "0477", eerduosiLeadersFunc)
           //          赤峰2，领导
           //          judgeLeaderStatus(chifengLeadersStatus, "2", "0476", chifengLeaderFunc)
 
