@@ -1,7 +1,7 @@
 
 import java.util.{Calendar, Properties}
 
-import area.{AreaList, EerduosiAreaList, WengniuteAreaList, WulanhaoteAreaList}
+import area.{AreaList, EerduosiAreaList, MinhangjichangAreaList, WengniuteAreaList, WulanhaoteAreaList}
 import kafka.serializer.StringDecoder
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.{HashPartitioner, SparkContext}
@@ -122,6 +122,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val eerduosiArea = new EerduosiAreaList
         val wulanhaoteAreaList = new WulanhaoteAreaList
         val wengniuteAreaList = new WengniuteAreaList
+        val minhangjichangAreaList = new MinhangjichangAreaList
 
         val hunValue = hunBro.value
         val conn = hunValue.createHbaseConnection
@@ -134,6 +135,7 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
         val eerduosi = eerduosiArea.eerduosi
         val wulanhaote = wulanhaoteAreaList.wulanhaote
         val wengniute = wengniuteAreaList.wengniute
+        val jichang = minhangjichangAreaList.jichang
 
 
         val sortedPartition = partition.toList.sortBy(_._2._1._2)
@@ -276,11 +278,16 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             ) true else false
           }
 
+          val minhangjichangFunc = {
+            if (jichang.contains(lac_ci)) true else false
+          }
+
 
           if (lastUserStatus.contains(phone_no)) {
             val lastStatus: (String, Long, Long) = lastUserStatus(phone_no)
             val lastEventType = lastStatus._1
 
+            //            驻留时长判断及发送函数
             def judgeUserStayDuration(areaFunc: Boolean
                                       , timeout: Long
                                      ) {
@@ -321,6 +328,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             else if (lastEventType.equals("22")) judgeUserStayDuration(wengniuteFunc, 3600L * 5)
             //              通辽9
             else if (lastEventType.equals("9")) judgeUserStayDuration(tongliaoFunc, 60L * 4)
+            //            民航机场55
+            else if (lastEventType.equals("55")) judgeUserStayDuration(minhangjichangFunc, 60L * 10)
             //              托县25
             //            else if (lastEventType.equals("25")) {
             //              judgeUserStayDuration(tuoxianFunc, 600L)
@@ -351,6 +360,8 @@ object RoamingAndPartyUserStayDuration extends TimeFunc with Serializable {
             else if (wengniuteFunc) updateStatus("22")
             //              通辽9
             else if (tongliaoFunc) updateStatus("9")
+            //            明航机场55
+            else if (minhangjichangFunc) updateStatus("55")
             //            else if (eerduosiFunc) {
             //              lastUserStatus.update(phone_no, ("7", startTimeLong / 1000, 0))
             //            }
